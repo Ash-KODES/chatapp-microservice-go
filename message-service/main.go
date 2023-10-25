@@ -3,12 +3,15 @@
 package main
 
 import (
-    "database/sql"
-    "log"
-    "net/http"
-    "github.com/gorilla/mux"
-    "github.com/rs/cors"
-    "mychatapp/router"
+	"chat-app-microservice/message-service/handler"
+	"database/sql"
+	"log"
+	"mychatapp/router"
+	"net/http"
+
+	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
+	"github.com/rs/cors"
 )
 
 func main() {
@@ -19,6 +22,7 @@ func main() {
     }
     defer db.Close()
 
+    // Create a new router
     router := mux.NewRouter()
 
     // Set up CORS middleware
@@ -28,8 +32,15 @@ func main() {
         AllowedHeaders: []string{"Content-Type", "Authorization"},
     })
 
+    // Use CORS middleware
     router.Use(corsHandler.Handler)
 
+    router.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+    // Handle WebSocket connections here
+    // Initialize your WebSocketHandler and manage WebSocket connections
+    webSocketHandler := handler.NewWebSocketHandler()
+    webSocketHandler.HandleWebSocket(w, r)
+})
     // Set up message routes
     routerSetup := router.SetupMessageRoutes(router, db)
 

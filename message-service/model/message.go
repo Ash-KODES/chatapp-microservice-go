@@ -5,5 +5,13 @@ package models
 type Message struct {
     ID        int    `json:"id"`
     Content   string `json:"content"`
-    // Add more fields for other message types (image, audio, video, file, etc.)
+    UserID    int    `json:"user_id"`
+    Timestamp string `json:"timestamp"`
+
+    // Fields for other message types
+    ImageURL  string `json:"image_url"`
+    AudioURL  string `json:"audio_url"`
+    VideoURL  string `json:"video_url"`
+    FileURL   string `json:"file_url"`
+    // Add more fields as needed
 }

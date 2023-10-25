@@ -1,13 +1,13 @@
-// message_handler.go
+// message_http_handler.go
 
-package main
+package handler
 
 import (
-	"chat-app-microservice/message-service/repository"
-	"database/sql"
-	"encoding/json"
-	"net/http"
-	"chat-app-microservice/message-service/model"
+    "encoding/json"
+    "net/http"
+    "database/sql"
+    "mychatapp/models"
+    "mychatapp/repository"
 )
 
 type MessageHandler struct {
@@ -18,7 +18,9 @@ func NewMessageHandler(db *sql.DB) *MessageHandler {
     return &MessageHandler{repository.NewMessageRepository(db)}
 }
 
-func (h *MessageHandler) CreateTextMessageHandler(w http.ResponseWriter, r *http.Request) {
+// message_http_handler.go
+
+func (h *MessageHandler) CreateMessageHandler(w http.ResponseWriter, r *http.Request) {
     var message models.Message
     decoder := json.NewDecoder(r.Body)
     if err := decoder.Decode(&message); err != nil {
@@ -27,10 +29,17 @@ func (h *MessageHandler) CreateTextMessageHandler(w http.ResponseWriter, r *http
     }
     defer r.Body.Close()
 
-    // Insert the text message into the database
-    messageID, err := h.repo.CreateTextMessage(message.Content)
+    // You should validate and authenticate the user, obtain the channel ID, and perform necessary checks.
+
+    // Send the message to the WebSocket channel for real-time delivery
+    // For example, if you have a WebSocket connection for the channel, you can send the message to that connection.
+
+    // Insert the message into the database with the associated channel ID
+    // You should extract the channel ID from the message or the user's session.
+
+    messageID, err := h.repo.CreateMessage(message)
     if err != nil {
-        http.Error(w, "Error creating text message", http.StatusInternalServerError)
+        http.Error(w, "Error creating message", http.StatusInternalServerError)
         return
     }
 
@@ -41,4 +50,13 @@ func (h *MessageHandler) CreateTextMessageHandler(w http.ResponseWriter, r *http
     }{MessageID: messageID})
 }
 
-// Implement handlers for other message types (image, audio, video, file, etc.)
+// message_http_handler.go
+
+func (h *MessageHandler) GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
+    // Extract the channel ID from the request, validate user access, and obtain messages for that channel from the database.
+
+    // Retrieve messages for the specified channel
+    // You should adjust the logic to match your data schema and security requirements.
+
+    // Return the messages as a JSON response
+}

@@ -3,14 +3,20 @@
 package router
 
 import (
-    "github.com/gorilla/mux"
-    "database/sql"
-    "chat-app-microservice/message-service/handler"
+	"chat-app-microservice/message-service/handler"
+	"database/sql"
+
+	"github.com/gorilla/mux"
 )
 
-func SetupMessageRoutes(r *mux.Router, db *sql.DB) {
+func SetupMessageRoutes(r *mux.Router, db *sql.DB) *mux.Router {
     messageHandler := handler.NewMessageHandler(db)
+    webSocketHandler := handler.NewWebSocketHandler()
 
-    r.HandleFunc("/messages/text", messageHandler.CreateTextMessageHandler).Methods("POST")
-    // Define routes for other message types (image, audio, video, file, etc.)
+    r.HandleFunc("/messages", messageHandler.CreateMessageHandler).Methods("POST")
+    r.HandleFunc("/ws", webSocketHandler.HandleWebSocket)
+
+    // Define routes for retrieving messages, message history, and searching for messages
+
+    return r
 }
