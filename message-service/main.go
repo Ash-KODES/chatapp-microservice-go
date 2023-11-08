@@ -32,7 +32,7 @@ func main() {
 	})
 
 	// Use CORS middleware
-	router.Use(corsHandler.Handler)
+	r.Use(corsHandler.Handler)
 
 	router.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		// Handle WebSocket connections here

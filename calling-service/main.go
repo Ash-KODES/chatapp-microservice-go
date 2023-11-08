@@ -1,27 +1,31 @@
-// main.go
-// Entry point for the video calling service
-
 package main
 
 import (
-    "database/sql"
-    "log"
-    "net/http"
-    "github.com/gorilla/mux"
-    "github.com/rs/cors"
-    "chat-app-microservice/calling-service/router"
+	"chat-app-microservice/calling-service/router"
+	"database/sql"
+	"fmt"
+	"log"
+	"net/http"
+
+	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 )
 
 func main() {
-    // Replace with your database connection string
-    db, err := sql.Open("postgres", "user=username dbname=mychatapp sslmode=disable")
-    if err != nil {
-        log.Fatal(err)
-    }
+    const (
+		host     = "localhost"
+		port     = 5432
+		user     = "postgres"
+		password = "12345"
+		dbname   = "mychatapp"
+	)
+	psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	db, err := sql.Open("postgres", psqlconn)
+	CheckError(err)
     defer db.Close()
 
     // Create a new router
-    router := mux.NewRouter()
+    r := mux.NewRouter()
 
     // Set up CORS middleware
     corsHandler := cors.New(cors.Options{
@@ -31,13 +35,19 @@ func main() {
     })
 
     // Use CORS middleware
-    router.Use(corsHandler.Handler)
+    r.Use(corsHandler.Handler)
 
     // Set up video calling routes
-    router.SetupRoutes(router, db)
+    router.SetupRoutes(r, db)
 
     // Start the server
-    port := ":8082" // You can use a different port if needed
+    Serverport := ":8082" 
     log.Printf("Video Calling Service is running on port %s\n", port)
-    log.Fatal(http.ListenAndServe(port, routerSetup))
+    log.Fatal(http.ListenAndServe(Serverport, r))
+}
+
+func CheckError(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
 }
