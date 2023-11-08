@@ -12,7 +12,6 @@ import (
 )
 
 func main() {
-	// Replace with your database connection string
 	const (
 		host     = "localhost"
 		port     = 5432
