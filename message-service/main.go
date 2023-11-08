@@ -10,6 +10,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 	"github.com/rs/cors"
 )
 
@@ -33,12 +34,20 @@ func main() {
 
 	// Use CORS middleware
 	r.Use(corsHandler.Handler)
-
+	var upgrader = websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+	}
 	router.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		// Handle WebSocket connections here
-		// Initialize your WebSocketHandler and manage WebSocket connections
+		// Upgrade the HTTP connection to a WebSocket connection
+		conn, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			log.Printf("Error upgrading connection to WebSocket: %v", err)
+			return
+		}
+		defer conn.Close()
 		webSocketHandler := handler.NewWebSocketHandler()
-		webSocketHandler.HandleWebSocket(w, r)
+		webSocketHandler.HandleWebSocket(conn)
 	})
 
 	// Set up routes using your custom router package

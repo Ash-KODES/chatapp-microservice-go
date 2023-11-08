@@ -3,10 +3,10 @@
 package handler
 
 import (
+	models "chat-app-microservice/message-service/model"
+	"chat-app-microservice/message-service/repository"
 	"database/sql"
 	"encoding/json"
-	"mychatapp/models"
-	"mychatapp/repository"
 	"net/http"
 )
 
@@ -65,8 +65,6 @@ func (h *MessageHandler) sendToWebSocketChannel(message models.Message) {
 		h.ws.SendToChatPartner(websocket.TextMessage, messagePayload)
 	}
 }
-
-// message_http_handler.go
 
 func (h *MessageHandler) GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	// Extract the channel ID from the request, validate user access, and obtain messages for that channel from the database.
