@@ -66,11 +66,86 @@ func (h *MessageHandler) sendToWebSocketChannel(message models.Message) {
 	}
 }
 
+// GetMessagesHandler handles retrieving messages from a channel
 func (h *MessageHandler) GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
-	// Extract the channel ID from the request, validate user access, and obtain messages for that channel from the database.
+	// Extract the channel ID from the request (e.g., from URL parameters)
+	vars := mux.Vars(r)
+	channelID := vars["channelID"]
 
-	// Retrieve messages for the specified channel
-	// You should adjust the logic to match your data schema and security requirements.
+	// Validate user access to the channel and perform necessary checks
+	if !h.isUserAuthorized(r, channelID) {
+		http.Error(w, "Access denied", http.StatusForbidden)
+		return
+	}
+
+	// Retrieve messages for the specified channel from the database
+	messages, err := h.repo.GetMessagesForChannel(channelID)
+	if err != nil {
+		http.Error(w, "Error retrieving messages", http.StatusInternalServerError)
+		return
+	}
 
 	// Return the messages as a JSON response
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(messages); err != nil {
+		http.Error(w, "Error encoding JSON response", http.StatusInternalServerError)
+	}
+}
+
+// isUserAuthorized checks if the user is authorized to access the channel
+func (h *MessageHandler) isUserAuthorized(r *http.Request, channelID string) bool {
+	// You should implement the logic to check if the user is authorized to access the channel.
+	// This may involve checking if the user is a participant in the channel or has the required permissions.
+
+	// For example, if your application uses authentication and sessions, you can check if the user is authenticated.
+	if !userIsAuthenticated(r) {
+		return false
+	}
+
+	// You may also need to check if the user is a participant in the channel.
+	participants, err := h.repo.GetParticipantsForChannel(channelID)
+	if err != nil {
+		return false
+	}
+
+	user := getCurrentUserFromRequest(r)
+
+	for _, participant := range participants {
+		if participant == user {
+			return true
+		}
+	}
+
+	return false
+}
+
+// userIsAuthenticated checks if the user is authenticated
+func userIsAuthenticated(r *http.Request) bool {
+	// Implement your logic to check if the user is authenticated.
+	// You can access user information from the request or session.
+	// Replace this with your actual authentication logic.
+
+	// Example: Check if a user is logged in by checking for a session or token.
+	// user := getCurrentUserFromRequest(r)
+	// return user != nil
+
+	return true // Replace with your actual authentication logic
+}
+
+// getCurrentUserFromRequest retrieves user information from the request
+func getCurrentUserFromRequest(r *http.Request) string {
+	// Implement your logic to extract user information from the request.
+	// This could involve checking session data, tokens, or other authentication mechanisms.
+	// Replace this with your actual logic.
+
+	// Example: Extract user information from a token or session.
+	// userToken := extractUserTokenFromRequest(r)
+	// user, err := validateUserToken(userToken)
+	// if err != nil {
+	//     return ""
+	// }
+	// return user
+
+	return "sample_user" // Replace with your actual user retrieval logic
 }
