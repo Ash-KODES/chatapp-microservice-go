@@ -1,5 +1,3 @@
-// message_routes.go
-
 package router
 
 import (
@@ -9,7 +7,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func SetupMessageRoutes(r *mux.Router, db *sql.DB) *mux.Router {
+func SetupRoutes(r *mux.Router, db *sql.DB) *mux.Router {
     messageHandler := handler.NewMessageHandler(db)
     webSocketHandler := handler.NewWebSocketHandler()
 

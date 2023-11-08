@@ -9,7 +9,7 @@ import (
     "net/http"
     "github.com/gorilla/mux"
     "github.com/rs/cors"
-    "mychatapp/router"
+    "chat-app-microservice/calling-service/router"
 )
 
 func main() {
@@ -34,7 +34,7 @@ func main() {
     router.Use(corsHandler.Handler)
 
     // Set up video calling routes
-    routerSetup := router.SetupVideoCallingRoutes(router, db)
+    router.SetupRoutes(router, db)
 
     // Start the server
     port := ":8082" // You can use a different port if needed

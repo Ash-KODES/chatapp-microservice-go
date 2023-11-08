@@ -1,5 +1,3 @@
-// channels-service/main.go
-
 package main
 
 import (
@@ -28,12 +26,8 @@ func main() {
 
 	defer db.Close()
 
-	
-
-	// Create a new router
 	r := mux.NewRouter()
 
-	// Set up routes using your custom router package
 	router.SetupRoutes(r, db)
 
 	// Start the server

@@ -1,19 +1,16 @@
-// router/routes.go
-// Define the routes for video calling
-
 package router
 
 import (
-    "github.com/gorilla/mux"
-    "net/http"
-    "database/sql"
+	"database/sql"
+	"github.com/gorilla/mux"
+	"chat-app-microservice/calling-service/handler"
 )
 
-func SetupVideoCallingRoutes(r *mux.Router, db *sql.DB) *mux.Router {
-    // Define video calling routes
-    r.HandleFunc("/create-call", createCallHandler(db)).Methods("POST")
-    r.HandleFunc("/join-call/{callID}", joinCallHandler(db)).Methods("POST")
-    r.HandleFunc("/leave-call/{callID}", leaveCallHandler(db)).Methods("POST")
+func SetupRoutes(r *mux.Router, db *sql.DB) *mux.Router {
+	// create,join,leave call
+	r.HandleFunc("/create-call", createCallHandler(db)).Methods("POST")
+	r.HandleFunc("/join-call/{callID}", joinCallHandler(db)).Methods("POST")
+	r.HandleFunc("/leave-call/{callID}", leaveCallHandler(db)).Methods("POST")
 
-    return r
+	return r
 }
