@@ -1,7 +1,10 @@
+// handler/handler.go
+
 package handler
 
 import (
 	"chat-app-microservice/calling-service/model"
+	"chat-app-microservice/calling-service/db"
 	"database/sql"
 	"encoding/json"
 	"net/http"
@@ -57,38 +60,96 @@ func CreateCallHandler(db *sql.DB) http.HandlerFunc {
 // Join a call (video or voice)
 func JoinCallHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var call model.Call
+		var joinRequest model.JoinRequest
+		decoder := json.NewDecoder(r.Body)
+		if err := decoder.Decode(&joinRequest); err != nil {
+			http.Error(w, "Invalid request payload", http.StatusBadRequest)
+			return
+		}
+		defer r.Body.Close()
+
 		// Parse and validate the request payload
 		// Extract user information, call ID, and channel ID
+		userID := joinRequest.UserID
+		callID := joinRequest.CallID
+		channelID := joinRequest.ChannelID
 
 		// Identify the existing channel associated with the call
 		// Retrieve the call details from the database
+		call, err := db.GetCall(callID)
+		if err != nil {
+			http.Error(w, "Error retrieving call details", http.StatusInternalServerError)
+			return
+		}
 
 		// Establish the appropriate connection based on the call type
 		// If it's a video call, set up WebRTC connections
 		// If it's a voice call, set up audio connections
+		// Implement your WebRTC setup logic here
 
 		// Update the call status, e.g., set it to "in-progress"
+		call.Status = model.CallStatusInProgress
+		if err := db.UpdateCall(call); err != nil {
+			http.Error(w, "Error updating call status", http.StatusInternalServerError)
+			return
+		}
 
 		// Return a response, indicating success or failure
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(struct {
+			Message string `json:"message"`
+		}{Message: "Successfully joined the call"})
 	}
 }
 
 // Leave a call (video or voice)
 func LeaveCallHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var leaveRequest model.LeaveRequest
+		decoder := json.NewDecoder(r.Body)
+		if err := decoder.Decode(&leaveRequest); err != nil {
+			http.Error(w, "Invalid request payload", http.StatusBadRequest)
+			return
+		}
+		defer r.Body.Close()
+
 		// Parse and validate the request payload
 		// Extract user information, call ID, and channel ID
+		userID := leaveRequest.UserID
+		callID := leaveRequest.CallID
+		channelID := leaveRequest.ChannelID
 
 		// Close the appropriate connection based on the call type
 		// If it's a video call, close WebRTC connections
 		// If it's a voice call, close audio connections
+		// Implement your WebRTC close logic here
 
 		// Update the call status, e.g., set it to "ended"
+		call, err := db.GetCall(callID)
+		if err != nil {
+			http.Error(w, "Error retrieving call details", http.StatusInternalServerError)
+			return
+		}
+
+		call.Status = model.CallStatusEnded
+		if err := db.UpdateCall(call); err != nil {
+			http.Error(w, "Error updating call status", http.StatusInternalServerError)
+			return
+		}
 
 		// If both users leave the call, close the call and update the call status
+		if err := db.CloseCallIfEmpty(channelID); err != nil {
+			http.Error(w, "Error closing call", http.StatusInternalServerError)
+			return
+		}
 
 		// Return a response, indicating success or failure
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(struct {
+			Message string `json:"message"`
+		}{Message: "Successfully left the call"})
 	}
 }
 
